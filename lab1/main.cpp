@@ -5,39 +5,39 @@
 #include "FileHandler.h"
 #include "Exception.h"
 
-DoubleLinkedList* globalList = nullptr;
-FileHandler* globalFileHandler = nullptr;
+DoubleLinkedList* currentList = nullptr;
+FileHandler* currentFileHandler = nullptr;
 
 int showList() {
     try {
         std::cout << "Содержимое списка: ";
-        globalList->print();
+        currentList->print();
     } catch (const std::exception& e) {
         std::cerr << "Ошибка: " << e.what() << std::endl;
-        globalFileHandler->writeError(e.what());
+        currentFileHandler->writeError(e.what());
     }
     return 1;
 }
 
 int calculateFormula() {
     try {
-        double result = globalList->calculateVariant3();
+        double result = currentList->calculateVariant3();
         std::cout << "Результат вычисления (x1+xn)*(x2+xn-1)*...*(xn+x1): " << result << std::endl;
-        globalFileHandler->writeOutput("Результат вычисления: " + std::to_string(result));
+        currentFileHandler->writeOutput("Результат вычисления: " + std::to_string(result));
     } catch (const std::exception& e) {
         std::cerr << "Ошибка: " << e.what() << std::endl;
-        globalFileHandler->writeError(e.what());
+        currentFileHandler->writeError(e.what());
     }
     return 1;
 }
 
 int checkEmpty() {
-    std::cout << "Список " << (globalList->isEmpty() ? "пуст" : "не пуст") << std::endl;
+    std::cout << "Список " << (currentList->isEmpty() ? "пуст" : "не пуст") << std::endl;
     return 1;
 }
 
 int getSize() {
-    std::cout << "Размер списка: " << globalList->getSize() << std::endl;
+    std::cout << "Размер списка: " << currentList->getSize() << std::endl;
     return 1;
 }
 
@@ -59,14 +59,14 @@ int main(int argc, char* argv[]) {
     
     try {
         FileHandler fileHandler(argv[1], argv[2], argv[3]);
-        globalFileHandler = &fileHandler;
+        DoubleLinkedList list = fileHandler.readInput();
         
-        DoubleLinkedList list = fileHandler.readInput(); // чтение данных из файла
-        globalList = &list;
+        // устанавливаем текущие объекты
+        currentList = &list;
+        currentFileHandler = &fileHandler;
         
         std::cout << "Данные успешно загружены из файла!" << std::endl;
         
-        // менюшка
         CMenuItem items[] = {
             CMenuItem("Показать список", showList),
             CMenuItem("Вычислить формулу", calculateFormula),
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
         do {
             result = menu.runCommand();
         } while (result != 0);
-        
+         
     } catch (const std::exception& e) {
         std::cerr << "Критическая ошибка: " << e.what() << std::endl;
         std::ofstream errFile(argv[3]);

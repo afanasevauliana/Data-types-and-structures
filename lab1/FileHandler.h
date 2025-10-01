@@ -38,7 +38,9 @@ DoubleLinkedList FileHandler::readInput() {
     
     for (int i = 0; i < n; i++) {
         double value;
-        inFile >> value;
+        if (!(inFile >> value)) {
+            throw ListException("Ошибка чтения данных из файла!");
+        }
         list.addToEnd(value);
     }
     

@@ -35,9 +35,9 @@ void DoubleLinkedList::addToEnd(double value) {
     Node* newNode = new Node(value);
     
     if (isEmpty()) {
-        head = tail = newNode;
+        head = tail = newNode; // если список пуст, новый узел становится и head и tail
     } else {
-        tail->next = newNode;
+        tail->next = newNode; // добавляем в конец
         newNode->prev = tail;
         tail = newNode;
     }
@@ -63,12 +63,13 @@ void DoubleLinkedList::print() const {
 }
 
 void DoubleLinkedList::clear() {
-    while (head != nullptr) {
-        Node* temp = head;
-        head = head->next;
-        delete temp;
+    Node* current = head;
+    while (current != nullptr) {
+        Node* next = current->next;
+        delete current;
+        current = next;
     }
-    tail = nullptr;
+    head = tail = nullptr;
     size = 0;
 }
 
