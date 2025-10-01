@@ -28,7 +28,7 @@ public:
     bool isEmpty() const { return size == 0; }
     int getSize() const { return size; }
     double getAt(int index) const;
-    double calculateVariant3() const;
+    double calculateF() const;
 };
 
 void DoubleLinkedList::addToEnd(double value) {
@@ -85,7 +85,7 @@ double DoubleLinkedList::getAt(int index) const {
     return current->data;
 }
 
-double DoubleLinkedList::calculateVariant3() const {
+double DoubleLinkedList::calculateF() const {
     if (isEmpty()) {
         throw ListException("Список пуст для вычисления!");
     }
