@@ -21,7 +21,7 @@ int showList() {
 
 int calculateFormula() {
     try {
-        double result = currentList->calculateVariant3();
+        double result = currentList->calculateF();
         std::cout << "Результат вычисления (x1+xn)*(x2+xn-1)*...*(xn+x1): " << result << std::endl;
         currentFileHandler->writeOutput("Результат вычисления: " + std::to_string(result));
     } catch (const std::exception& e) {
