@@ -3,10 +3,10 @@
 
 class TreeNode {
 public:
-    int data;
+    std::string data;
     TreeNode* left;
     TreeNode* right;
     
-    TreeNode(int value);
+    TreeNode(const std::string& value);
     ~TreeNode();
 };

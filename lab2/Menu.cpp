@@ -37,19 +37,22 @@ void CMenu::print() {
 int CMenu::runCommand() {
     while (true) {
         print();
-        std::cout << "\n   Выберите пункт >> ";
+        std::cout << "\nВыберите пункт >> ";
         if (!(std::cin >> select)) {
-            std::cout << "Введите корректное число!\n";
+            std::cout << "Введите корректное число.\n";
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
         }
         if (select == 0) {
-            std::cout << "Выход из программы...\n";
+            std::cout << "Программа завершена\n";
             return 0;
         }
         else if (select > 0 && select <= static_cast<int>(count)) {
-            items[select - 1].run();
+            int result = items[select - 1].run();
+            if (result == 0) {
+                return 0;
+            }
             continue;
         }
         else {

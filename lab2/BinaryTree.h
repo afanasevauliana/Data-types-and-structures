@@ -1,23 +1,26 @@
 #pragma once
 #include "TreeNode.h"
+#include "TreeException.h"
 #include <string>
 #include <fstream>
 
 class BinaryTree {
 private:
     TreeNode* root;
+    
     TreeNode* insert(TreeNode* node, int value);
     TreeNode* deleteNode(TreeNode* node, int value);
     TreeNode* findMin(TreeNode* node);
     TreeNode* findMax(TreeNode* node);
     TreeNode* search(TreeNode* node, int value);
     void destroyTree(TreeNode* node);
+    int countNodes(TreeNode* node);
+    int getHeight(TreeNode* node);
+    
     void printTree(TreeNode* node, int level, std::string& result);
     void infixTraversal(TreeNode* node, std::string& result);
     void prefixTraversal(TreeNode* node, std::string& result);
     void postfixTraversal(TreeNode* node, std::string& result);
-    int countNodes(TreeNode* node);
-    int getHeight(TreeNode* node);
     
 public:
     BinaryTree();
@@ -29,6 +32,7 @@ public:
     TreeNode* findMin();
     TreeNode* findMax();
     void clear();
+    void buildExpressionTree();  // строит дерево для ((6*3)+(8*7))*(6*5)
     
     std::string getInfixNotation();
     std::string getPrefixNotation();

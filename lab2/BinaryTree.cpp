@@ -22,12 +22,13 @@ void BinaryTree::destroyTree(TreeNode* node) {
 
 TreeNode* BinaryTree::insert(TreeNode* node, int value) {
     if (node == nullptr) {
-        return new TreeNode(value);
+        return new TreeNode(std::to_string(value));
     }
     
-    if (value < node->data) {
+    int nodeValue = std::stoi(node->data);
+    if (value < nodeValue) {
         node->left = insert(node->left, value);
-    } else if (value > node->data) {
+    } else if (value > nodeValue) {
         node->right = insert(node->right, value);
     }
     
@@ -63,11 +64,14 @@ TreeNode* BinaryTree::findMax() {
 }
 
 TreeNode* BinaryTree::search(TreeNode* node, int value) {
-    if (node == nullptr || node->data == value) {
+    if (node == nullptr) return nullptr;
+    
+    int nodeValue = std::stoi(node->data);
+    if (nodeValue == value) {
         return node;
     }
     
-    if (value < node->data) {
+    if (value < nodeValue) {
         return search(node->left, value);
     } else {
         return search(node->right, value);
@@ -81,9 +85,10 @@ TreeNode* BinaryTree::search(int value) {
 TreeNode* BinaryTree::deleteNode(TreeNode* node, int value) {
     if (node == nullptr) return nullptr;
     
-    if (value < node->data) {
+    int nodeValue = std::stoi(node->data);
+    if (value < nodeValue) {
         node->left = deleteNode(node->left, value);
-    } else if (value > node->data) {
+    } else if (value > nodeValue) {
         node->right = deleteNode(node->right, value);
     } else {
         if (node->left == nullptr) {
@@ -95,9 +100,11 @@ TreeNode* BinaryTree::deleteNode(TreeNode* node, int value) {
             delete node;
             return temp;
         }
+        
         TreeNode* temp = findMin(node->right);
         node->data = temp->data;
-        node->right = deleteNode(node->right, temp->data);
+        int tempValue = std::stoi(temp->data);
+        node->right = deleteNode(node->right, tempValue);
     }
     
     return node;
@@ -112,36 +119,58 @@ void BinaryTree::clear() {
     root = nullptr;
 }
 
-void BinaryTree::infixTraversal(TreeNode* node, std::string& result) { // обходы дерева
+void BinaryTree::buildExpressionTree() {
+    clear();
+    TreeNode* node6_1 = new TreeNode("6");
+    TreeNode* node3 = new TreeNode("3");
+    TreeNode* node8 = new TreeNode("8");
+    TreeNode* node7 = new TreeNode("7");
+    TreeNode* node6_2 = new TreeNode("6");
+    TreeNode* node5 = new TreeNode("5");
+    
+    TreeNode* mult1 = new TreeNode("*");
+    mult1->left = node6_1;
+    mult1->right = node3;
+    TreeNode* mult2 = new TreeNode("*");
+    mult2->left = node8;
+    mult2->right = node7;
+    TreeNode* mult3 = new TreeNode("*");
+    mult3->left = node6_2;
+    mult3->right = node5;
+    
+    TreeNode* plus = new TreeNode("+");
+    plus->left = mult1;
+    plus->right = mult2;
+    
+    root = new TreeNode("*");
+    root->left = plus;
+    root->right = mult3;
+}
+
+void BinaryTree::infixTraversal(TreeNode* node, std::string& result) {
     if (!node) return;
-    
-    if (node->left) {
-        result += "(";
-        infixTraversal(node->left, result);
-    }
-    
-    result += std::to_string(node->data);
-    
-    if (node->right) {
-        infixTraversal(node->right, result);
-        result += ")";
-    }
+
+    bool needsParentheses = (node->left || node->right) && 
+                           (node->data == "+" || node->data == "-" || node->data == "*" || node->data == "/");
+    if (needsParentheses) result += "(";
+    infixTraversal(node->left, result);
+    result += node->data;
+    infixTraversal(node->right, result);
+    if (needsParentheses) result += ")";
 }
 
 void BinaryTree::prefixTraversal(TreeNode* node, std::string& result) {
     if (!node) return;
-    
-    result += std::to_string(node->data) + " ";
+    result += node->data + " ";
     prefixTraversal(node->left, result);
     prefixTraversal(node->right, result);
 }
 
 void BinaryTree::postfixTraversal(TreeNode* node, std::string& result) {
     if (!node) return;
-    
     postfixTraversal(node->left, result);
     postfixTraversal(node->right, result);
-    result += std::to_string(node->data) + " ";
+    result += node->data + " ";
 }
 
 std::string BinaryTree::getInfixNotation() {
@@ -162,17 +191,14 @@ std::string BinaryTree::getPostfixNotation() {
     return result;
 }
 
-void BinaryTree::printTree(TreeNode* node, int level, std::string& result) { // визуализация дерева
+void BinaryTree::printTree(TreeNode* node, int level, std::string& result) {
     if (!node) return;
-    
-    printTree(node->right, level + 1, result);
-    
-    for (int i = 0; i < level; i++) {
-        result += "   ";
-    }
-    result += std::to_string(node->data) + "\n";
-    
     printTree(node->left, level + 1, result);
+    for (int i = 0; i < level; i++) {
+        result += "    ";
+    }
+    result += node->data + "\n";
+    printTree(node->right, level + 1, result);
 }
 
 std::string BinaryTree::printTreeVisual() {
@@ -199,32 +225,34 @@ int BinaryTree::countNodes() {
     return countNodes(root);
 }
 
+
 void BinaryTree::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Cannot open input file: " + filename);
+        throw TreeException("Не удалось открыть входной файл: " + filename);
     }
-    
     clear();
-    
     int value;
     while (file >> value) {
         insert(value);
     }
-    
     file.close();
 }
 
 void BinaryTree::saveToFile(const std::string& filename) {
     std::ofstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Cannot open output file: " + filename);
+        throw TreeException("Не удалось открыть выходной файл: " + filename);
     }
-    
-    file << "Дерево: " << getInfixNotation() << "\n";
-    file << "Визуализация:\n" << printTreeVisual();
+    file << "    ИНФОРМАЦИЯ О ДЕРЕВЕ\n";
+    file << "Инфиксная запись: " << getInfixNotation() << "\n";
+    file << "Префиксная запись: " << getPrefixNotation() << "\n";
+    file << "Постфиксная запись: " << getPostfixNotation() << "\n\n";
+    file << "    ВИЗУАЛИЗАЦИЯ ДЕРЕВА\n";
+    file << printTreeVisual() << "\n";
+    file << "    СТАТИСТИКА\n";
     file << "Количество узлов: " << countNodes() << "\n";
-    file << "Высота: " << getHeight() << "\n";
+    file << "Высота дерева: " << getHeight() << "\n";
     
     file.close();
 }
