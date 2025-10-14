@@ -44,7 +44,6 @@ int loadBSTFromFile() {
             
             if (count > 0) {
                 cout << "ДДП загружено из файла. Загружено " << count << " чисел." << endl;
-                bst->print();
             } else {
                 cout << "Файл input.txt пустой или содержит не числа." << endl;
                 cout << "Добавьте числа в формате: 10 5 15 3 7 12 20" << endl;
