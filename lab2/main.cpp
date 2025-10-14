@@ -7,20 +7,64 @@
 #include "ExceptionHandler.h"
 #include <iostream>
 #include <windows.h>
+#include <sstream>
 
 using namespace std;
 
-// Глобальные переменные для меню
 BinaryTree* expressionTree = nullptr;
 BinarySearchTree* bst = nullptr;
 Files* fileManager = nullptr;
 
-// 1. Индивидуальное задание
+int individualTask();
+int insertNode();
+int removeNode();
+int printBST();
+int searchNode();
+int findMinimum();
+int findMaximum();
+int clearBST();
+int loadBSTFromFile();
+
+int loadBSTFromFile() {
+    try {
+        if (!bst) {
+            bst = new BinarySearchTree();
+        }
+        
+        string content = fileManager->readInput();
+        if (!content.empty()) {
+            istringstream iss(content);
+            int number;
+            int count = 0;
+            
+            while (iss >> number) {
+                bst->insert(number);
+                count++;
+            }
+            
+            if (count > 0) {
+                cout << "ДДП загружено из файла. Загружено " << count << " чисел." << endl;
+                bst->print();
+            } else {
+                cout << "Файл input.txt пустой или содержит не числа." << endl;
+                cout << "Добавьте числа в формате: 10 5 15 3 7 12 20" << endl;
+            }
+        } else {
+            cout << "Файл input.txt пустой." << endl;
+        }
+        return 1;
+    }
+    catch (const exception& e) {
+        cerr << "Ошибка загрузки ДДП: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
+    }
+}
+
 int individualTask() {
     try {
-        cout << "=== Индивидуальное задание ===" << endl;
-        cout << "Построить бинарное дерево выражения ((6*3)+(8*7)*(6*5))" << endl;
-        cout << "и вывести обходы: префиксный, инфиксный, постфиксный" << endl;
+        cout << "Индивидуальное задание:" << endl;
+        cout << "Бинарное дерево выражения ((6*3)+(8*7)*(6*5))" << endl;
         
         if (expressionTree) delete expressionTree;
         expressionTree = new BinaryTree();
@@ -54,11 +98,11 @@ int individualTask() {
     }
 }
 
-// 2. Добавление вершины в ДДП
 int insertNode() {
     try {
         if (!bst) {
-            bst = new BinarySearchTree();
+            cout << "ДДП не загружено. Сначала выполните пункт 1." << endl;
+            return 1;
         }
         
         int value;
@@ -67,6 +111,8 @@ int insertNode() {
         
         bst->insert(value);
         cout << "Вершина " << value << " добавлена в дерево" << endl;
+        
+        fileManager->writeOutput("Добавлена вершина: " + to_string(value));
         
         return 1;
     }
@@ -77,11 +123,10 @@ int insertNode() {
     }
 }
 
-// 3. Удаление вершины из ДДП
 int removeNode() {
     try {
         if (!bst) {
-            cout << "Дерево не создано!" << endl;
+            cout << "ДДП не загружено. Сначала выполните пункт 1." << endl;
             return 1;
         }
         
@@ -92,6 +137,7 @@ int removeNode() {
         if (bst->search(value)) {
             bst->remove(value);
             cout << "Вершина " << value << " удалена из дерева" << endl;
+            fileManager->writeOutput("Удалена вершина: " + to_string(value));
         } else {
             cout << "Вершина " << value << " не найдена в дереве" << endl;
         }
@@ -105,13 +151,13 @@ int removeNode() {
     }
 }
 
-// 4. Вывод (печать) дерева
 int printBST() {
     try {
         if (bst) {
             bst->print();
+            fileManager->writeOutput("Вывод текущего ДДП:");
         } else {
-            cout << "Дерево не создано!" << endl;
+            cout << "ДДП не загружено. Сначала выполните пункт 1." << endl;
         }
         return 1;
     }
@@ -122,11 +168,10 @@ int printBST() {
     }
 }
 
-// 5. Поиск вершины в дереве
 int searchNode() {
     try {
         if (!bst) {
-            cout << "Дерево не создано!" << endl;
+            cout << "ДДП не загружено. Сначала выполните пункт 1." << endl;
             return 1;
         }
         
@@ -149,11 +194,10 @@ int searchNode() {
     }
 }
 
-// 6. Поиск минимума в ДДП
 int findMinimum() {
     try {
         if (!bst) {
-            cout << "Дерево не создано!" << endl;
+            cout << "ДДП не загружено. Сначала выполните пункт 1." << endl;
             return 1;
         }
         
@@ -169,11 +213,10 @@ int findMinimum() {
     }
 }
 
-// 7. Поиск максимума в ДДП
 int findMaximum() {
     try {
         if (!bst) {
-            cout << "Дерево не создано!" << endl;
+            cout << "ДДП не загружено. Сначала выполните пункт 1." << endl;
             return 1;
         }
         
@@ -189,7 +232,6 @@ int findMaximum() {
     }
 }
 
-// 8. Удаление дерева
 int clearBST() {
     try {
         if (bst) {
@@ -212,7 +254,6 @@ int main(int argc, char* argv[]) {
     SetConsoleCP(65001);
     
     try {
-        // Обработка аргументов командной строки
         string inputFile = "input.txt";
         string outputFile = "output.txt";
         string errorFile = "errors.txt";
@@ -225,23 +266,26 @@ int main(int argc, char* argv[]) {
         
         fileManager = new Files(inputFile, outputFile, errorFile);
         
-        // Создание пунктов меню согласно заданию
+        bst = new BinarySearchTree();
+        loadBSTFromFile();
+        cout << endl;
+        
         const int ITEMS_NUMBER = 8;
         CMenuItem items[ITEMS_NUMBER] {
+            CMenuItem{"Перезагрузить ДДП из файла", loadBSTFromFile},
             CMenuItem{"Индивидуальное задание", individualTask},
             CMenuItem{"Добавление вершины в ДДП", insertNode},
             CMenuItem{"Удаление вершины из ДДП", removeNode},
             CMenuItem{"Вывод (печать) дерева", printBST},
             CMenuItem{"Поиск вершины в дереве", searchNode},
             CMenuItem{"Поиск минимума в ДДП", findMinimum},
-            CMenuItem{"Поиск максимума в ДДП", findMaximum},
-            CMenuItem{"Удаление дерева", clearBST}
+            CMenuItem{"Поиск максимума в ДДП", findMaximum}
         };
         
         CMenu menu("Управление бинарными деревьями", items, ITEMS_NUMBER);
         
         cout << "Файлы:" << endl;
-        cout << "Входной: " << inputFile << endl;
+        cout << "Входной: " << inputFile << " (числа для ДДП)" << endl;
         cout << "Выходной: " << outputFile << endl;
         cout << "Ошибок: " << errorFile << endl << endl;
         
@@ -250,7 +294,6 @@ int main(int argc, char* argv[]) {
             result = menu.runCommand();
         } while (result != 0);
         
-        // Очистка
         if (expressionTree) delete expressionTree;
         if (bst) delete bst;
         if (fileManager) delete fileManager;

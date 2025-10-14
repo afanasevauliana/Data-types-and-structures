@@ -3,9 +3,7 @@
 
 TreeNode::TreeNode(const std::string& value) : data(value), left(nullptr), right(nullptr) {}
 
-TreeNode::~TreeNode() {
-    // Деструктор будет рекурсивно удалять потомков
-}
+TreeNode::~TreeNode() {}
 
 bool TreeNode::isOperator() const {
     return data == "+" || data == "-" || data == "*" || data == "/";

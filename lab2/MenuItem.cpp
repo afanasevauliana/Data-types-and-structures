@@ -1,6 +1,5 @@
 #include "./MenuItem.h"
 
-
 CMenuItem::CMenuItem(std::string name, Func func) : item_name(name), func(func) {}
 
 string CMenuItem::getName() {

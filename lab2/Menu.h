@@ -1,11 +1,9 @@
 #pragma once
-
 #include <cstddef>
 #include <string>
 #include "./MenuItem.h"
 
 using namespace std;
-
 
 class CMenu {
     public:

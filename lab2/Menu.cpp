@@ -30,7 +30,7 @@ void CMenu::print() {
         items[i].print();
         std::cout << std::endl;
     }
-    std::cout << "0. Exit" << std::endl;
+    std::cout << "0. Завершение программы" << std::endl;
 }
 
 int CMenu::runCommand() {
