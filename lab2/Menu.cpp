@@ -25,38 +25,29 @@ CMenuItem *CMenu::getItems() {
 }
 
 void CMenu::print() {
-    std::cout << "\n" << title << ":\n";
     for (size_t i{}; i < count; ++i) {
         std::cout << i + 1 << ". ";
         items[i].print();
         std::cout << std::endl;
     }
-    std::cout << "0. Выход" << std::endl;
+    std::cout << "0. Exit" << std::endl;
 }
 
 int CMenu::runCommand() {
-    while (true) {
-        print();
-        std::cout << "\nВыберите пункт >> ";
-        if (!(std::cin >> select)) {
-            std::cout << "Введите корректное число.\n";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            continue;
-        }
-        if (select == 0) {
-            std::cout << "Программа завершена\n";
-            return 0;
-        }
-        else if (select > 0 && select <= static_cast<int>(count)) {
-            int result = items[select - 1].run();
-            if (result == 0) {
-                return 0;
-            }
-            continue;
-        }
-        else {
-            std::cout << "Введите число от 0 до " << count << "!\n";
-        }
+    print();
+    std::cout << "\n   Select >> ";
+    
+    while (!(std::cin >> select)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Ошибка! Пожалуйста, введите число: ";
+    }
+    if (select == 0) {
+        return 0;
+    } else if (select > 0 && select <= static_cast<int>(count)) {
+        return items[select - 1].run();
+    } else {
+        std::cout << "Ошибка! Пожалуйста, выберите число от 0 до " << count << std::endl;
+        return -1;
     }
 }

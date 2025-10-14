@@ -1,50 +1,28 @@
 #pragma once
 #include "TreeNode.h"
-#include "TreeException.h"
 #include <string>
-#include <fstream>
+#include <vector>
 
 class BinaryTree {
 private:
     TreeNode* root;
     
-    TreeNode* insert(TreeNode* node, int value);
-    TreeNode* deleteNode(TreeNode* node, int value);
-    TreeNode* findMin(TreeNode* node);
-    TreeNode* findMax(TreeNode* node);
-    TreeNode* search(TreeNode* node, int value);
-    void destroyTree(TreeNode* node);
-    int countNodes(TreeNode* node);
-    int getHeight(TreeNode* node);
-    
-    void printTree(TreeNode* node, int level, std::string& result);
-    void infixTraversal(TreeNode* node, std::string& result);
-    void prefixTraversal(TreeNode* node, std::string& result);
-    void postfixTraversal(TreeNode* node, std::string& result);
+    void clear(TreeNode* node);
+    void printTree(TreeNode* node, int level) const;
+    void prefixTraversal(TreeNode* node, std::vector<std::string>& result) const;
+    void infixTraversal(TreeNode* node, std::vector<std::string>& result) const;
+    void postfixTraversal(TreeNode* node, std::vector<std::string>& result) const;
     
 public:
     BinaryTree();
     ~BinaryTree();
     
-    void insert(int value);
-    void deleteNode(int value);
-    TreeNode* search(int value);
-    TreeNode* findMin();
-    TreeNode* findMax();
-    void clear();
-    void buildExpressionTree();  // строит дерево для ((6*3)+(8*7))*(6*5)
+    void buildFromExpression(const std::string& expression);
+    void print() const;
     
-    std::string getInfixNotation();
-    std::string getPrefixNotation();
-    std::string getPostfixNotation();
-    
-    std::string printTreeVisual();
-    int getHeight();
-    int countNodes();
-    bool isEmpty() const { return root == nullptr; }
-    
-    void loadFromFile(const std::string& filename);
-    void saveToFile(const std::string& filename);
+    std::vector<std::string> getPrefixNotation() const;
+    std::vector<std::string> getInfixNotation() const; 
+    std::vector<std::string> getPostfixNotation() const;
     
     TreeNode* getRoot() const { return root; }
 };

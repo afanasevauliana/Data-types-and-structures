@@ -9,4 +9,8 @@ public:
     
     TreeNode(const std::string& value);
     ~TreeNode();
+    
+    bool isOperator() const;
+    bool isNumber() const;
+    double getNumberValue() const;
 };

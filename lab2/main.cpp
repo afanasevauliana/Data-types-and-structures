@@ -1,291 +1,264 @@
 #include "Menu.h"
 #include "MenuItem.h"
 #include "BinaryTree.h"
-#include "TreeException.h"
+#include "BinarySearchTree.h"
+#include "Expression.h"
+#include "Files.h"
+#include "ExceptionHandler.h"
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <limits>
+#include <windows.h>
+
 using namespace std;
 
-BinaryTree tree;
-string inputFile = "input.txt";
-string outputFile = "output.txt";
-string errorFile = "errors.txt";
+// Глобальные переменные для меню
+BinaryTree* expressionTree = nullptr;
+BinarySearchTree* bst = nullptr;
+Files* fileManager = nullptr;
 
-void logError(const string& message) {
-    ofstream err(errorFile, ios::app);
-    err << "Ошибка: " << message << endl;
-    err.close();
+// 1. Индивидуальное задание
+int individualTask() {
+    try {
+        cout << "=== Индивидуальное задание ===" << endl;
+        cout << "Построить бинарное дерево выражения ((6*3)+(8*7)*(6*5))" << endl;
+        cout << "и вывести обходы: префиксный, инфиксный, постфиксный" << endl;
+        
+        if (expressionTree) delete expressionTree;
+        expressionTree = new BinaryTree();
+        expressionTree->buildFromExpression("((6*3)+(8*7)*(6*5))");
+        
+        cout << "Дерево выражения:" << endl;
+        expressionTree->print();
+        
+        auto prefix = expressionTree->getPrefixNotation();
+        auto infix = expressionTree->getInfixNotation();
+        auto postfix = expressionTree->getPostfixNotation();
+        
+        cout << "Префиксная запись: ";
+        for (const auto& token : prefix) cout << token << " ";
+        cout << endl;
+        
+        cout << "Инфиксная запись: ";
+        for (const auto& token : infix) cout << token << " ";
+        cout << endl;
+        
+        cout << "Постфиксная запись: ";
+        for (const auto& token : postfix) cout << token << " ";
+        cout << endl;
+        
+        return 1;
+    }
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
+    }
 }
 
-#pragma region Функции для меню
-
+// 2. Добавление вершины в ДДП
 int insertNode() {
     try {
-        cout << "Введите значение для добавления: ";
-        int value;
-        cin >> value;
-        
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw TreeException("Некорректный ввод числа");
+        if (!bst) {
+            bst = new BinarySearchTree();
         }
         
-        tree.insert(value);
-        cout << "Узел " << value << " успешно добавлен в дерево." << endl;
+        int value;
+        cout << "Введите значение для добавления: ";
+        cin >> value;
+        
+        bst->insert(value);
+        cout << "Вершина " << value << " добавлена в дерево" << endl;
         
         return 1;
     }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
     }
 }
 
-int deleteNode() {
+// 3. Удаление вершины из ДДП
+int removeNode() {
     try {
-        if (tree.isEmpty()) {
-            cout << "Дерево пусто!" << endl;
+        if (!bst) {
+            cout << "Дерево не создано!" << endl;
             return 1;
         }
         
-        cout << "Введите значение для удаления: ";
         int value;
+        cout << "Введите значение для удаления: ";
         cin >> value;
         
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw TreeException("Некорректный ввод числа");
-        }
-        
-        TreeNode* found = tree.search(value);
-        if (found) {
-            tree.deleteNode(value);
-            cout << "Узел " << value << " успешно удален." << endl;
+        if (bst->search(value)) {
+            bst->remove(value);
+            cout << "Вершина " << value << " удалена из дерева" << endl;
         } else {
-            cout << "Узел " << value << " не найден в дереве." << endl;
+            cout << "Вершина " << value << " не найдена в дереве" << endl;
         }
         
         return 1;
     }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
     }
 }
 
+// 4. Вывод (печать) дерева
+int printBST() {
+    try {
+        if (bst) {
+            bst->print();
+        } else {
+            cout << "Дерево не создано!" << endl;
+        }
+        return 1;
+    }
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
+    }
+}
+
+// 5. Поиск вершины в дереве
 int searchNode() {
     try {
-        if (tree.isEmpty()) {
-            cout << "Дерево пусто!" << endl;
+        if (!bst) {
+            cout << "Дерево не создано!" << endl;
             return 1;
         }
         
-        cout << "Введите значение для поиска: ";
         int value;
+        cout << "Введите значение для поиска: ";
         cin >> value;
         
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw TreeException("Некорректный ввод числа");
-        }
-        
-        TreeNode* found = tree.search(value);
-        if (found) {
-            cout << "Узел " << value << " найден в дереве." << endl;
+        if (bst->search(value)) {
+            cout << "Вершина " << value << " найдена в дереве" << endl;
         } else {
-            cout << "Узел " << value << " не найден в дереве." << endl;
+            cout << "Вершина " << value << " не найдена в дереве" << endl;
         }
         
         return 1;
     }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
     }
 }
 
-int findMinMax() {
+// 6. Поиск минимума в ДДП
+int findMinimum() {
     try {
-        if (tree.isEmpty()) {
-            cout << "Дерево пусто!" << endl;
+        if (!bst) {
+            cout << "Дерево не создано!" << endl;
             return 1;
         }
         
-        TreeNode* minNode = tree.findMin();
-        TreeNode* maxNode = tree.findMax();
-        
-        cout << "Минимальный элемент: " << minNode->data << endl;
-        cout << "Максимальный элемент: " << maxNode->data << endl;
+        int minVal = bst->findMin();
+        cout << "Минимальное значение в дереве: " << minVal << endl;
         
         return 1;
     }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
     }
 }
 
-int printTree() {
+// 7. Поиск максимума в ДДП
+int findMaximum() {
     try {
-        if (tree.isEmpty()) {
-            cout << "Дерево пусто!" << endl;
+        if (!bst) {
+            cout << "Дерево не создано!" << endl;
             return 1;
         }
         
-        cout << "\n    ВИЗУАЛИЗАЦИЯ ДЕРЕВА" << endl;
-        cout << tree.printTreeVisual();
-        
-        cout << "\n    ОБХОДЫ ДЕРЕВА" << endl;
-        cout << "Инфиксная запись: " << tree.getInfixNotation() << endl;
-        cout << "Префиксная запись: " << tree.getPrefixNotation() << endl;
-        cout << "Постфиксная запись: " << tree.getPostfixNotation() << endl;
-        
-        cout << "\n    ИНФОРМАЦИЯ" << endl;
-        cout << "Количество узлов: " << tree.countNodes() << endl;
-        cout << "Высота дерева: " << tree.getHeight() << endl;
+        int maxVal = bst->findMax();
+        cout << "Максимальное значение в дереве: " << maxVal << endl;
         
         return 1;
     }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
     }
 }
 
-int loadFromFile() {
+// 8. Удаление дерева
+int clearBST() {
     try {
-        cout << "Введите имя файла для загрузки: ";
-        string filename;
-        cin >> filename;
-        
-        tree.loadFromFile(filename);
-        cout << "Дерево успешно загружено из файла " << filename << endl;
-        
-        return 1;
-    }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
-    }
-}
-
-int saveToFile() {
-    try {
-        if (tree.isEmpty()) {
-            cout << "Дерево пусто!" << endl;
-            return 1;
+        if (bst) {
+            bst->clear();
+            cout << "Дерево очищено" << endl;
+        } else {
+            cout << "Дерево не создано!" << endl;
         }
-        
-        cout << "Введите имя файла для сохранения: ";
-        string filename;
-        cin >> filename;
-        
-        tree.saveToFile(filename);
-        cout << "Дерево успешно сохранено в файл " << filename << endl;
-        
         return 1;
     }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
+    catch (const exception& e) {
+        cerr << "Ошибка: " << e.what() << endl;
+        if (fileManager) fileManager->writeError(e.what());
+        return -1;
     }
 }
-
-int clearTree() {
-    try {
-        tree.clear();
-        cout << "Дерево успешно очищено." << endl;
-        return 1;
-    }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
-    }
-}
-
-int processExpressionTree() {
-    try {
-        tree.buildExpressionTree();
-        tree.saveToFile(outputFile);
-        cout << "\n    ДЕРЕВО ВЫРАЖЕНИЯ ((6*3)+(8*7))*(6*5)" << endl;
-        cout << tree.printTreeVisual();
-        
-        cout << "\n    ОБХОДЫ ДЕРЕВА ВЫРАЖЕНИЯ" << endl;
-        cout << "Инфиксная запись: " << tree.getInfixNotation() << endl;
-        cout << "Префиксная запись: " << tree.getPrefixNotation() << endl;
-        cout << "Постфиксная запись: " << tree.getPostfixNotation() << endl;
-        
-        cout << "\nРезультаты сохранены в файл: " << outputFile << endl;
-        
-        return 1;
-    }
-    catch (const TreeException& e) {
-        logError(e.what());
-        cout << "Ошибка: " << e.what() << endl;
-        return 0;
-    }
-}
-
-#pragma endregion
-
-const int ITEMS_NUMBER = 9;
 
 int main(int argc, char* argv[]) {
-    system("chcp 65001 > nul");
-    if (argc >= 4) {
-        inputFile = argv[1];
-        outputFile = argv[2];
-        errorFile = argv[3];
-        cout << "Используются файлы:\n";
-        cout << "Входной: " << inputFile << "\n";
-        cout << "Выходной: " << outputFile << "\n"; 
-        cout << "Ошибок: " << errorFile << "\n\n";
-    } else {
-        cout << "Используются файлы по умолчанию:\n";
-        cout << "Входной: " << inputFile << "\n";
-        cout << "Выходной: " << outputFile << "\n";
-        cout << "Ошибок: " << errorFile << "\n\n";
-        }
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
     
-    ofstream out(outputFile, ios::trunc);
-    out.close();
-    ofstream err(errorFile, ios::trunc);
-    err.close();
-
     try {
-        tree.loadFromFile(inputFile);
-        cout << "Данные загружены из файла " << inputFile << endl;
-    } 
-    catch (const TreeException& e) {
-        cout << "Не удалось загрузить данные из " << inputFile << " (файл не существует или пустой)" << endl;
+        // Обработка аргументов командной строки
+        string inputFile = "input.txt";
+        string outputFile = "output.txt";
+        string errorFile = "errors.txt";
+        
+        if (argc >= 4) {
+            inputFile = argv[1];
+            outputFile = argv[2];
+            errorFile = argv[3];
+        }
+        
+        fileManager = new Files(inputFile, outputFile, errorFile);
+        
+        // Создание пунктов меню согласно заданию
+        const int ITEMS_NUMBER = 8;
+        CMenuItem items[ITEMS_NUMBER] {
+            CMenuItem{"Индивидуальное задание", individualTask},
+            CMenuItem{"Добавление вершины в ДДП", insertNode},
+            CMenuItem{"Удаление вершины из ДДП", removeNode},
+            CMenuItem{"Вывод (печать) дерева", printBST},
+            CMenuItem{"Поиск вершины в дереве", searchNode},
+            CMenuItem{"Поиск минимума в ДДП", findMinimum},
+            CMenuItem{"Поиск максимума в ДДП", findMaximum},
+            CMenuItem{"Удаление дерева", clearBST}
+        };
+        
+        CMenu menu("Управление бинарными деревьями", items, ITEMS_NUMBER);
+        
+        cout << "Файлы:" << endl;
+        cout << "Входной: " << inputFile << endl;
+        cout << "Выходной: " << outputFile << endl;
+        cout << "Ошибок: " << errorFile << endl << endl;
+        
+        int result;
+        do {
+            result = menu.runCommand();
+        } while (result != 0);
+        
+        // Очистка
+        if (expressionTree) delete expressionTree;
+        if (bst) delete bst;
+        if (fileManager) delete fileManager;
+        
+        return 0;
     }
-    
-    CMenuItem items[ITEMS_NUMBER] {
-        CMenuItem{"Добавить узел", insertNode},
-        CMenuItem{"Удалить узел", deleteNode},
-        CMenuItem{"Найти узел", searchNode},
-        CMenuItem{"Найти min/max", findMinMax},
-        CMenuItem{"Вывести дерево", printTree},
-        CMenuItem{"Загрузить из файла", loadFromFile},
-        CMenuItem{"Сохранить в файл", saveToFile},
-        CMenuItem{"Очистить дерево", clearTree},
-        CMenuItem{"Дерево выражения из моего варианта", processExpressionTree}
-    };
-    
-    CMenu menu("Меню", items, ITEMS_NUMBER);
-    while (menu.runCommand()) {};
-    return 0;
+    catch (const exception& e) {
+        cerr << "Критическая ошибка: " << e.what() << endl;
+        return -1;
+    }
 }
