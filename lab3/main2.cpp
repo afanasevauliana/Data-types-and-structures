@@ -48,7 +48,7 @@ public:
     
     void findSimplePath(int start, int end) {
         if (start < 1 || start > n || end < 1 || end > n) {
-            cout << "Ошибка: номера вершин должны быть от 1 до " << n << "!" << endl;
+            cout << "\nОшибка: номера вершин должны быть от 1 до " << n << "!" << endl;
             return;
         }
     
@@ -63,14 +63,15 @@ public:
             parent[i] = -1;
         }
         
+        cout << "\nАлгоритм работы:" << endl;
         queue[count++] = internalStart;
         visited[internalStart] = true;
-        cout << "Посещена вершина: " << start << endl;
+        cout << "Посещена вершина " << start << endl;
         bool pathFound = false;
         while (head < count && !pathFound) {
             int current = queue[head++];
             if (current == internalEnd) {
-                cout << "Найдена конечная вершина: " << end << endl;
+                cout << "Найдена конечная вершина " << end << endl;
                 pathFound = true;
                 break;
             }
@@ -80,7 +81,7 @@ public:
                     visited[i] = true;
                     parent[i] = current;
                     queue[count++] = i;
-                    cout << "Посещена вершина: " << i+1
+                    cout << "Посещена вершина " << i+1
                          << " (из вершины " << current+1 << ")" << endl;
                 }
             }
@@ -101,10 +102,8 @@ private:
         stack<int> pathStack;
         int current = internalEnd;
         
-        cout << "\nВосстановление пути:" << endl;
         while (current != -1) {
             pathStack.push(current);
-            cout << "Добавлена вершина: " << current+1 << endl;
             current = parent[current];
         }
         cout << "Простой путь из " << internalStart+1 << " в " << internalEnd+1 << ":" << endl;
@@ -119,14 +118,14 @@ private:
             edgeCount++;
         }
         cout << endl;
-        cout << "Длина пути: " << edgeCount << " ребер" << endl;
+        cout << "Длина пути (кол-во ребер): " << edgeCount << endl;
     }
 };
 
 int main() {
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
-    cout << "Все вершины нумеруются с 1!" << endl;
+    cout << "*Все вершины нумеруются с 1" << endl;
     Graph g(9);
     g.addEdge(1, 2);
     g.addEdge(1, 8);
@@ -145,10 +144,43 @@ int main() {
     g.printMatrix();
     
     int start, end;
-    cout << "Введите начальную вершину (1-9): ";
-    cin >> start;
-    cout << "Введите конечную вершину (1-9): ";
-    cin >> end;
+    bool inputOk = false;
+    while (!inputOk) {
+        cout << "Введите начальную вершину (1-9): ";
+        cin >> start;
+        
+        if (cin.fail()) {
+            cout << "Ошибка: введите ЧИСЛО от 1 до 9" << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');
+        } else if (start < 1 || start > 9) {
+            cout << "Ошибка: вершина должна быть от 1 до 9" << endl;
+            cin.ignore(1000, '\n');
+        } else {
+            inputOk = true;
+            cin.ignore(1000, '\n');
+        }
+    }
+
+    inputOk = false;
+    
+    while (!inputOk) {
+        cout << "Введите конечную вершину (1-9): ";
+        cin >> end;
+        
+        if (cin.fail()) {
+            cout << "Введите ЧИСЛО от 1 до 9" << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');
+        } else if (end < 1 || end > 9) {
+            cout << "Вершина должна быть от 1 до 9!" << endl;
+            cin.ignore(1000, '\n');
+        } else {
+            inputOk = true;
+            cin.ignore(1000, '\n');
+        }
+    }
+
     g.findSimplePath(start, end);
     return 0;
 }
